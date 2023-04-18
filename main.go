@@ -2,61 +2,61 @@ package main
 
 import "fmt"
 
-const (
-	SIZE = 5
-)
+const N int = 9
 
-var sol [SIZE][SIZE]int
-
-func main() {
-	for i := 0; i < SIZE; i++ {
-		for j := 0; j < SIZE; j++ {
-			sol[i][j] = -1
+func isValid(i, j int, sol [][]int) bool {
+	if i >= 1 && i <= N && j >= 1 && j <= N {
+		if sol[i][j] == -1 {
+			return true
 		}
 	}
-
-	x_move := [8]int{2, 1, -1, -2, -2, -1, 1, 2}
-	y_move := [8]int{1, 2, 2, 1, -1, -2, -2, -1}
-
-	sol[1][1] = 0
-
-	if knight_tour(1, 1, 1, x_move, y_move) {
-		for _, row := range sol {
-			fmt.Println("---------------------------------")
-			for _, col := range row {
-				if col < 10 {
-					fmt.Printf(" %d | ", col)
-				} else {
-					fmt.Print(col, " | ")
-				}
-			}
-			fmt.Println()
-		}
-	}
+	return false
 }
 
-func isValid(i, j int) bool {
-	return (i >= 0 && i < SIZE && j >= 0 && j < SIZE && sol[i][j] == -1)
-}
-
-func knight_tour(x, y, move int, x_move, y_move [8]int) bool {
-	if move == SIZE*SIZE {
+func knightTour(sol [][]int, i, j, stepCount int, xMove, yMove []int) bool {
+	if stepCount == N*N {
 		return true
 	}
 
 	for k := 0; k < 8; k++ {
-		next_x := x + x_move[k]
-		next_y := y + y_move[k]
+		nextI := i + xMove[k]
+		nextJ := j + yMove[k]
 
-		if isValid(next_x, next_y) {
-			sol[next_x][next_y] = move
-			if knight_tour(next_x, next_y, move+1, x_move, y_move) {
+		if isValid(nextI, nextJ, sol) {
+			sol[nextI][nextJ] = stepCount
+			if knightTour(sol, nextI, nextJ, stepCount+1, xMove, yMove) {
 				return true
 			}
-			sol[next_x][next_y] = -1
-
+			sol[nextI][nextJ] = -1 // backtracking
 		}
 	}
 
 	return false
+}
+
+func startKnightTour() bool {
+	sol := make([][]int, N+1)
+	for i := range sol {
+		sol[i] = make([]int, N+1)
+		for j := range sol[i] {
+			sol[i][j] = -1
+		}
+	}
+
+	xMove := []int{2, 1, -1, -2, -2, -1, 1, 2}
+	yMove := []int{1, 2, 2, 1, -1, -2, -2, -1}
+
+	sol[1][1] = 0 // placing knight at cell(1, 1)
+
+	if knightTour(sol, 1, 1, 1, xMove, yMove) {
+		for i := 1; i <= N; i++ {
+			fmt.Println(sol[i][1:])
+		}
+		return true
+	}
+	return false
+}
+
+func main() {
+	fmt.Println(startKnightTour())
 }
