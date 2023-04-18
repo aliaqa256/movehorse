@@ -3,72 +3,60 @@ package main
 import "fmt"
 
 const (
-	VERTICAL   = 0
-	HORIZONTAL = 1
-	SIZE = 6
+	SIZE = 8
 )
 
-var board [SIZE][SIZE]int
-
-var horseMoves = [8][2]int{
-	//    vertical, horizontal
-	{2, 1},
-	{2, -1},
-	{-2, -1},
-	{-2, 1},
-	{-1, -2},
-	{-1, 2},
-	{1, -2},
-	{1, 2},
-}
+var sol [SIZE][SIZE]int
 
 func main() {
-	horseMoveRecursive(0, 0, 1)
+	for i := 0; i < SIZE; i++ {
+		for j := 0; j < SIZE; j++ {
+			sol[i][j] = -1
+		}
+	}
+
+	x_move := [8]int{2, 1, -1, -2, -2, -1, 1, 2}
+	y_move := [8]int{1, 2, 2, 1, -1, -2, -2, -1}
+
+	sol[1][1] = 0
+
+	if knight_tour(1, 1, 1, x_move, y_move) {
+		for _, row := range sol {
+			fmt.Println("---------------------------------")
+			for _, col := range row {
+				if col < 10 {
+					fmt.Printf(" %d | ", col)
+				} else {
+					fmt.Print(col, " | ")
+				}
+			}
+			fmt.Println()
+		}
+	}
 }
 
-// horse move recursive
-func horseMoveRecursive(row, col, move int) bool {
-	if move == SIZE*SIZE+1{
-		
-		ShowBoard()
+func isValid(i, j int) bool {
+	return (i >= 0 && i < SIZE && j >= 0 && j < SIZE && sol[i][j] == -1)
+}
+
+func knight_tour(x, y, move int, x_move, y_move [8]int) bool {
+	if move == SIZE*SIZE {
 		return true
 	}
 
-	for i := 0; i < 8; i++ {
-		newRow := row + horseMoves[i][VERTICAL]
-		newCol := col + horseMoves[i][HORIZONTAL]
+	for k := 0; k < 8; k++ {
+		next_x := x + x_move[k]
+		next_y := y + y_move[k]
 
-		if Canmove(newRow, newCol) {
-			board[newRow][newCol] = move
-			if horseMoveRecursive(newRow, newCol, move+1) {
+		if isValid(next_x, next_y) {
+			sol[next_x][next_y] = move
+			if knight_tour(next_x, next_y, move+1, x_move, y_move) {
 				return true
-			} else {
-				board[newRow][newCol] = 0
 			}
+			sol[next_x][next_y] = -1
+
 		}
 	}
+
 	return false
-}
-
-func Canmove(row, col int) bool {
-	if row >= 0 && row < SIZE && col >= 0 && col < SIZE && board[row][col] == 0 {
-		return true
-	}
-	return false
-}
-
-
-func ShowBoard(){
-	for _, row := range board {
-		fmt.Println("---------------------------------")
-		for _, col := range row {
-			if col <10{
-				fmt.Printf(" %d | ",col)
-			}else{
-
-				fmt.Print(col," | ")
-			}
-		}
-		fmt.Println()
-	}
 }
