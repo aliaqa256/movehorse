@@ -3,12 +3,12 @@ package main
 import "fmt"
 
 const (
-	SIZE       = 4
 	VERTICAL   = 0
 	HORIZONTAL = 1
+	SIZE = 6
 )
 
-var chessBoard [SIZE][SIZE]int
+var board [SIZE][SIZE]int
 
 var horseMoves = [8][2]int{
 	//    vertical, horizontal
@@ -23,55 +23,44 @@ var horseMoves = [8][2]int{
 }
 
 func main() {
-	MoveTheHorse(0, 0, 0)
-	PrintBoard()
+	horseMoveRecursive(0, 0, 1)
 }
 
-func MoveTheHorse(row, col, moveNumber int)  {
-	if moveNumber == 0 {
-		chessBoard[row][col] = 99
-		moveNumber++
+// horse move recursive
+func horseMoveRecursive(row, col, move int) bool {
+	if move == SIZE*SIZE+1{
 		
+		ShowBoard()
+		return true
 	}
 
+	for i := 0; i < 8; i++ {
+		newRow := row + horseMoves[i][VERTICAL]
+		newCol := col + horseMoves[i][HORIZONTAL]
 
-
-	if moveNumber == SIZE*SIZE -1 {
-		return 
-	}
-	for _, mm := range horseMoves {
-		if CanMove(row, col, mm) {
-			MoveHores(row, col, mm, moveNumber)
-			MoveTheHorse(row+mm[VERTICAL], col+mm[HORIZONTAL], moveNumber+1) 
-			chessBoard[row+mm[VERTICAL]][col+mm[HORIZONTAL]] = moveNumber 
+		if Canmove(newRow, newCol) {
+			board[newRow][newCol] = move
+			if horseMoveRecursive(newRow, newCol, move+1) {
+				return true
+			} else {
+				board[newRow][newCol] = 0
+			}
 		}
-		
-
 	}
-
-	
+	return false
 }
 
-func CanMove(row, col int, movement [2]int) bool {
-	if row+movement[VERTICAL] < 0 || row+movement[VERTICAL] >= SIZE {
-		return false
+func Canmove(row, col int) bool {
+	if row >= 0 && row < SIZE && col >= 0 && col < SIZE && board[row][col] == 0 {
+		return true
 	}
-	if col+movement[HORIZONTAL] < 0 || col+movement[HORIZONTAL] >= SIZE {
-		return false
-	}
-	if chessBoard[row+movement[VERTICAL]][col+movement[HORIZONTAL]] != 0 {
-		return false
-	}
-	return true
+	return false
 }
 
-func MoveHores(row, col int, movement [2]int, sign int) {
-	chessBoard[row+movement[VERTICAL]][col+movement[HORIZONTAL]] = sign
-}
 
-func PrintBoard() {
-	for _, row := range chessBoard {
-		fmt.Println("-------------------")
+func ShowBoard(){
+	for _, row := range board {
+		fmt.Println("---------------------------------")
 		for _, col := range row {
 			if col <10{
 				fmt.Printf(" %d | ",col)
@@ -82,16 +71,4 @@ func PrintBoard() {
 		}
 		fmt.Println()
 	}
-}
-
-
-func IsOutOfIndex(row, col int, movement [2]int) bool{
-	if row+movement[VERTICAL] < 0 || row+movement[VERTICAL] >= SIZE {
-		return false
-	}
-	if col+movement[HORIZONTAL] < 0 || col+movement[HORIZONTAL] >= SIZE {
-		return false
-	}
-
-	return true
 }
