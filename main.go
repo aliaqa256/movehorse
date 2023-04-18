@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 const (
-	SIZE = 8
+	SIZE = 5
 )
 
 var sol [SIZE][SIZE]int
