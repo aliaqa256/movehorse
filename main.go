@@ -1,62 +1,59 @@
 package main
 
-import "fmt"
-
-const (
-	SIZE = 5
+import (
+    "fmt"
+    "sort"
 )
 
-var sol [SIZE][SIZE]int
-
 func main() {
-	for i := 0; i < SIZE; i++ {
-		for j := 0; j < SIZE; j++ {
-			sol[i][j] = -1
-		}
-	}
-
-	x_move := [8]int{2, 1, -1, -2, -2, -1, 1, 2}
-	y_move := [8]int{1, 2, 2, 1, -1, -2, -2, -1}
-
-	sol[1][1] = 0
-
-	if knight_tour(1, 1, 1, x_move, y_move) {
-		for _, row := range sol {
-			fmt.Println("---------------------------------")
-			for _, col := range row {
-				if col < 10 {
-					fmt.Printf(" %d | ", col)
-				} else {
-					fmt.Print(col, " | ")
-				}
-			}
-			fmt.Println()
-		}
-	}
+    n := 8
+    board := make([][]int, n)
+    for i := range board {
+        board[i] = make([]int, n)
+    }
+    x, y := 5,5
+    if solveKT(board, x, y, 1, n) {
+        printBoard(board)
+    } else {
+        fmt.Println("Solution does not exist")
+    }
 }
 
-func isValid(i, j int) bool {
-	return (i >= 0 && i < SIZE && j >= 0 && j < SIZE && sol[i][j] == -1)
+func solveKT(board [][]int, x, y, moveNum, n int) bool {
+    if moveNum == n*n+1 {
+        return true
+    }
+    moves := getMoves(board, x, y, n)
+    sort.Slice(moves, func(i, j int) bool {
+        return len(getMoves(board, moves[i][0], moves[i][1], n)) < len(getMoves(board, moves[j][0], moves[j][1], n))
+    })
+    for _, move := range moves {
+        i, j := move[0], move[1]
+        board[i][j] = moveNum
+        if solveKT(board, i, j, moveNum+1, n) {
+            return true
+        }
+        board[i][j] = 0
+    }
+    return false
 }
 
-func knight_tour(x, y, move int, x_move, y_move [8]int) bool {
-	if move == SIZE*SIZE {
-		return true
-	}
+func getMoves(board [][]int, x, y, n int) [][2]int {
+    moves := make([][2]int, 0, 8)
+    for _, move := range [][2]int{{-2, 1}, {-1, 2}, {1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1}} {
+        i, j := x+move[0], y+move[1]
+        if i >= 0 && i < n && j >= 0 && j < n && board[i][j] == 0 {
+            moves = append(moves, [2]int{i, j})
+        }
+    }
+    return moves
+}
 
-	for k := 0; k < 8; k++ {
-		next_x := x + x_move[k]
-		next_y := y + y_move[k]
-
-		if isValid(next_x, next_y) {
-			sol[next_x][next_y] = move
-			if knight_tour(next_x, next_y, move+1, x_move, y_move) {
-				return true
-			}
-			sol[next_x][next_y] = -1
-
-		}
-	}
-
-	return false
+func printBoard(board [][]int) {
+    for i := range board {
+        for j := range board[i] {
+            fmt.Printf("%3d ", board[i][j])
+        }
+        fmt.Println()
+    }
 }
